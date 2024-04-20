@@ -6,10 +6,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_absolute_error,mean_squared_error
-from tabulate import tabulate 
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from random import shuffle
 from scipy.stats import pearsonr
+from tabulate import tabulate 
 
 
 breeds_data = pd.read_csv(r"C:\Users\林承劭\Desktop\大學課程\coding\python\Data Science\Final Project\breeds.csv")
@@ -44,14 +45,21 @@ print(categorical_features)
 # use label-Encoder to change the categorical feature into numerical feature
 labelEncoder = LabelEncoder()
 for category in ['breed','url','breed_group', 'life_span']:
-    Cbreeds_data[category] = labelEncoder.fit_transform(Cbreeds_data[category])
+    Cbreeds_data[category] = labelEncoder.fit_transform(Cbreeds_data[category])   
 
 
 labelEncoder = LabelEncoder()
 for category in ['breed_group', 'life_span']:
     Nbreeds_data[category] = labelEncoder.fit_transform(Nbreeds_data[category])
 #print(Cbreed_data.info())
+"""
+for column in Nbreeds_data.columns[3:-4]: 
+    Nbreeds_data[column].value_counts().plot(kind="bar")
+    plt.title(column)  
+    plt.xticks(ticks=range(5), labels=range(1, 6))
+    plt.show()
 
+"""
 
 #Check whether this dataset is balanced or not
 
@@ -79,12 +87,12 @@ X = Cbreeds_data[['a_adaptability', 'a1_adapts_well_to_apartment_living', 'a2_go
 y = Cbreeds_data['a1_adapts_well_to_apartment_living']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.14040114613180515, random_state=42)
-print(f"#sample:{X_train.shape[0]} #feature: {X_test.shape[1]}")
 
 # Normalize features using the same scaler for both train and test sets
 normalizer = StandardScaler()
 X_train = normalizer.fit_transform(X_train)
 X_test = normalizer.transform(X_test)
+print(f"#sample:{X_train.shape[0]} #feature: {X_test.shape[1]}")
 
 # Train the model
 lr = LinearRegression()
@@ -175,11 +183,35 @@ for alpha_value in alpha_values:
     print('RMSE: {}'.format(rmse_ridge))
 
 
-
 #logistic regression model
 
+LR = LogisticRegression()
+LR.fit(X_train, y_train)
 
-    
+y_train_pred = LR.predict(X_train)
+accuracy_train = accuracy_score(y_train, y_train_pred)
+precision_train = precision_score(y_train, y_train_pred, average='macro')
+recall_train = recall_score(y_train, y_train_pred, average= 'macro')
+F1_train = f1_score(y_train, y_train_pred, average= "macro")
+
+y_test_pred = LR.predict(X_test)
+accuracy_test = accuracy_score(y_test, y_test_pred)
+precision_test = precision_score(y_test, y_test_pred, average= "macro")
+recall_test = recall_score(y_test, y_test_pred, average= "macro")
+F1_test = f1_score(y_test, y_test_pred, average="macro")
+
+print('\nTraining set:')
+print('Accuracy: {}'.format(accuracy_train))
+print('Precision: {}'.format(precision_train))
+print('Recall: {}'.format(recall_train))
+print('F-1 Score: {}'.format(F1_train))
+
+print('\nTesting set:')
+print('Accuracy: {}'.format(accuracy_test))
+print('Precision: {}'.format(precision_test))
+print('Recall: {}'.format(recall_test))
+print('F-1 Score: {}'.format(F1_test))
+
 
 # set the user interface 
 headers = ["Code Option","Attribute", "Description"]
@@ -221,10 +253,16 @@ all_attributes = [
 print(tabulate(all_attributes, headers = headers, tablefmt='grid'))
 
 breeds_attributes = {}
-while True:
+min_attributes = 2  
+
+while len(breeds_attributes) < min_attributes:
     code = input("Please pick your preference above (if finished type 'done'): ")
     if code.lower() == 'done':
-        break
+        if len(breeds_attributes) < min_attributes:
+            print(f"Please select at least {min_attributes} attributes.")
+            continue
+        else:
+            break
     elif code.lower() not in [attr[0].lower() for attr in all_attributes]:
         print("Please enter a valid attribute code.")
         continue
@@ -237,6 +275,7 @@ while True:
                 print("This attribute has already been selected. Please pick another one.")
 
 print('\nSelected Attributes:', breeds_attributes)
+
 
 user_dog_features = []
 for attribute in breeds_attributes:
@@ -258,8 +297,7 @@ for index, row in breeds_data.iterrows():
 
 breeds_data['similarity'] = similarities
 
-# 選擇相似性最高的前十名狗
+
 top_10_dogs = breeds_data.nlargest(10, 'similarity')[['breed', 'url', 'similarity']]
 
 print(top_10_dogs)
-
