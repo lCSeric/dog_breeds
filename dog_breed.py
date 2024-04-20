@@ -8,19 +8,19 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_absolute_error,mean_squared_error
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from random import shuffle
-from scipy.stats import pearsonr
 from tabulate import tabulate 
 
+# Read the data
 
 breeds_data = pd.read_csv(r"C:\Users\林承劭\Desktop\大學課程\coding\python\Data Science\Final Project\breeds.csv")
-
+breeds_data.index = breeds_data.index + 2
+print(breeds_data)
 
 # find the missing value
 missing_value = breeds_data.isnull().sum().sum()
 print(f"Missing value: {missing_value}")
 
-# replaces all non-digit characters
+    # replaces all non-digit characters
 breeds_data['weight'] = breeds_data['weight'].str.replace(r'\D', '', regex=True)
 breeds_data['weight'] = pd.to_numeric(breeds_data['weight'], errors='coerce')  #If any value in the 'weight' column cannot be converted to a numeric value, it will be replaced with NaN
 mean_weight = breeds_data['weight'].mean()
@@ -32,7 +32,7 @@ breeds_data['height'] = pd.to_numeric(breeds_data['height'], errors='coerce')
 mean_height = breeds_data['height'].mean()
 breeds_data['height'] = breeds_data['height'].fillna(mean_height)
 
-# Check again if there is any missing value
+        # Check again if there is any missing value
 print(breeds_data.isnull().sum())
 
 Cbreeds_data = breeds_data.copy() # categorical 
@@ -42,7 +42,8 @@ Nbreeds_data = breeds_data.copy() # numerical
 categorical_features = Cbreeds_data.select_dtypes(include='object').columns
 print(categorical_features)
 
-# use label-Encoder to change the categorical feature into numerical feature
+
+    # use label-Encoder to change the categorical feature into numerical feature
 labelEncoder = LabelEncoder()
 for category in ['breed','url','breed_group', 'life_span']:
     Cbreeds_data[category] = labelEncoder.fit_transform(Cbreeds_data[category])   
@@ -52,16 +53,17 @@ labelEncoder = LabelEncoder()
 for category in ['breed_group', 'life_span']:
     Nbreeds_data[category] = labelEncoder.fit_transform(Nbreeds_data[category])
 #print(Cbreed_data.info())
-"""
+
+
+# visualize the breed data after numerical 
 for column in Nbreeds_data.columns[3:-4]: 
     Nbreeds_data[column].value_counts().plot(kind="bar")
     plt.title(column)  
     plt.xticks(ticks=range(5), labels=range(1, 6))
     plt.show()
 
-"""
 
-#Check whether this dataset is balanced or not
+# Check if the dataset is balanced
 
 apartment_living = Cbreeds_data.drop("a1_adapts_well_to_apartment_living", axis = 1).values
 tendency = Cbreeds_data['d5_tendency_to_bark_or_howl'].values
@@ -73,6 +75,7 @@ print(f"\n#sample:{apartment_living.shape[0]} #feature: {apartment_living.shape[
 grade_counts = Cbreeds_data['a1_adapts_well_to_apartment_living'].value_counts().sort_index()
 #print(grade_counts)
 
+# visualize 
 plt.figure(figsize=(6,4))
 plt.bar(grade_counts.index, grade_counts.values, color=['red', 'green', 'blue', 'yellow', 'purple'])
 plt.xlabel('Rate')
@@ -136,7 +139,7 @@ ax.set_xticks(x)
 ax.set_xticklabels(labels)
 ax.legend()
 
-# Display the plot
+# visualize 
 plt.show()
 
 
@@ -167,6 +170,8 @@ print('MAE is: {}'.format(mae_test))
 print('MSE is: {}'.format(mse_test))
 print('RMSE is: {}'.format(rmse_test))
 
+
+# tune the hyperparameters to get good performance
 
 alpha_values = [0.1, 1.0, 5.0]
 for alpha_value in alpha_values:
@@ -213,6 +218,7 @@ print('Recall: {}'.format(recall_test))
 print('F-1 Score: {}'.format(F1_test))
 
 
+
 # set the user interface 
 headers = ["Code Option","Attribute", "Description"]
 
@@ -252,14 +258,15 @@ all_attributes = [
 
 print(tabulate(all_attributes, headers = headers, tablefmt='grid'))
 
+# Let the user pick at least 2 two breed preferences
+
 breeds_attributes = {}
 min_attributes = 2  
-
-while len(breeds_attributes) < min_attributes:
+while True:
     code = input("Please pick your preference above (if finished type 'done'): ")
     if code.lower() == 'done':
         if len(breeds_attributes) < min_attributes:
-            print(f"Please select at least {min_attributes} attributes.")
+            print(f"Please select {min_attributes - len(breeds_attributes)} more attributes.")
             continue
         else:
             break
@@ -276,7 +283,7 @@ while len(breeds_attributes) < min_attributes:
 
 print('\nSelected Attributes:', breeds_attributes)
 
-
+#　let the user to rate each feature for a dog breed on a scale of 1 to 5
 user_dog_features = []
 for attribute in breeds_attributes:
     while True:
@@ -297,7 +304,12 @@ for index, row in breeds_data.iterrows():
 
 breeds_data['similarity'] = similarities
 
+# Calculate similarities and get top 10 similar dog breeds
+
+pd.set_option('display.max_colwidth', 100) # expand the width of each column 
 
 top_10_dogs = breeds_data.nlargest(10, 'similarity')[['breed', 'url', 'similarity']]
 
-print(top_10_dogs)
+print('\n'.join(['{:^100}'.format('Top 10 Similar Dog Breeds')]))
+print('\n')
+print(top_10_dogs.to_string(index=False))
