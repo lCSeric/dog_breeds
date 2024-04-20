@@ -14,7 +14,7 @@ from tabulate import tabulate
 
 breeds_data = pd.read_csv(r"C:\Users\林承劭\Desktop\大學課程\coding\python\Data Science\Final Project\breeds.csv")
 breeds_data.index = breeds_data.index + 2
-print(breeds_data)
+
 
 # find the missing value
 missing_value = breeds_data.isnull().sum().sum()
@@ -54,14 +54,14 @@ for category in ['breed_group', 'life_span']:
     Nbreeds_data[category] = labelEncoder.fit_transform(Nbreeds_data[category])
 #print(Cbreed_data.info())
 
-
+'''
 # visualize the breed data after numerical 
 for column in Nbreeds_data.columns[3:-4]: 
     Nbreeds_data[column].value_counts().plot(kind="bar")
     plt.title(column)  
     plt.xticks(ticks=range(5), labels=range(1, 6))
     plt.show()
-
+'''
 
 # Check if the dataset is balanced
 
