@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from tabulate import tabulate 
 
-# Read the data
+# load the data
 
 breeds_data = pd.read_csv(r"C:\Users\林承劭\Desktop\大學課程\coding\python\Data Science\Final Project\breeds.csv")
 breeds_data.index = breeds_data.index + 2
@@ -22,7 +22,8 @@ print(f"Missing value: {missing_value}")
 
     # replaces all non-digit characters
 breeds_data['weight'] = breeds_data['weight'].str.replace(r'\D', '', regex=True)
-breeds_data['weight'] = pd.to_numeric(breeds_data['weight'], errors='coerce')  #If any value in the 'weight' column cannot be converted to a numeric value, it will be replaced with NaN
+    #If any value in the 'weight' column cannot be converted to a numeric value, it will be replaced with NaN
+breeds_data['weight'] = pd.to_numeric(breeds_data['weight'], errors='coerce')  
 mean_weight = breeds_data['weight'].mean()
 breeds_data['weight'] = breeds_data['weight'].fillna(mean_weight)
 
@@ -193,6 +194,7 @@ for alpha_value in alpha_values:
 LR = LogisticRegression()
 LR.fit(X_train, y_train)
 
+
 y_train_pred = LR.predict(X_train)
 accuracy_train = accuracy_score(y_train, y_train_pred)
 precision_train = precision_score(y_train, y_train_pred, average='macro')
@@ -205,7 +207,8 @@ precision_test = precision_score(y_test, y_test_pred, average= "macro")
 recall_test = recall_score(y_test, y_test_pred, average= "macro")
 F1_test = f1_score(y_test, y_test_pred, average="macro")
 
-print('\nTraining set:')
+print("\nLogistic Regression")
+print('Training set:')
 print('Accuracy: {}'.format(accuracy_train))
 print('Precision: {}'.format(precision_train))
 print('Recall: {}'.format(recall_train))
@@ -293,6 +296,7 @@ for attribute in breeds_attributes:
             break
         else:
             print("Please enter a valid number (1 to 5).")
+            pass
 
 similarities = []
 for index, row in breeds_data.iterrows():
