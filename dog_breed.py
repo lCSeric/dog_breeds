@@ -9,6 +9,8 @@ from sklearn.metrics import mean_absolute_error,mean_squared_error
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from tabulate import tabulate 
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 # load the data
 
@@ -55,14 +57,15 @@ for category in ['breed_group', 'life_span']:
     Nbreeds_data[category] = labelEncoder.fit_transform(Nbreeds_data[category])
 #print(Cbreed_data.info())
 
-'''
+"""
 # visualize the breed data after numerical 
 for column in Nbreeds_data.columns[3:-4]: 
     Nbreeds_data[column].value_counts().plot(kind="bar")
     plt.title(column)  
     plt.xticks(ticks=range(5), labels=range(1, 6))
     plt.show()
-'''
+"""
+
 
 # Check if the dataset is balanced
 
@@ -107,6 +110,8 @@ y_train_pred = lr.predict(X_train)
 mae_train = mean_absolute_error(y_train_pred, y_train)
 mse_train = mean_squared_error(y_train_pred, y_train)
 rmse_train = np.sqrt(mse_train)
+
+print("\nLinear Regression Model Performance: ")
 print('\nTraining set:')
 print('MAE is: {}'.format(mae_train))
 print('MSE is: {}'.format(mse_train))
@@ -159,18 +164,18 @@ print("\ncoefficients is " + str(lr.coef_))
 y_test_pred_ridge = lr.predict(X_test)
 
 
-
 # Ridge regression model performance
 mae_ridge = mean_absolute_error(y_test_pred_ridge, y_test)
 mse_ridge = mean_squared_error(y_test_pred_ridge, y_test)
 rmse_ridge = np.sqrt(mse_ridge)
 
+'''
 # Compare with Linear Regression model performance
 print('\nLinear Regression Model Performance:')
 print('MAE is: {}'.format(mae_test))
 print('MSE is: {}'.format(mse_test))
 print('RMSE is: {}'.format(rmse_test))
-
+'''
 
 # tune the hyperparameters to get good performance
 
@@ -187,6 +192,16 @@ for alpha_value in alpha_values:
     print('MAE: {}'.format(mae_ridge))
     print('MSE: {}'.format(mse_ridge))
     print('RMSE: {}'.format(rmse_ridge))
+
+
+feature_names = ["Feature 1", "Feature 2", "Feature 3", "Feature 4", "Feature 5", "Feature 6", "Feature 7"]
+plt.figure(figsize=(10, 6))
+plt.bar(feature_names, lr.coef_)
+plt.xlabel('Features')
+plt.ylabel('Coefficient Value')
+plt.title('Ridge Regression Coefficients')
+plt.xticks(rotation=45)
+plt.show()
 
 
 #logistic regression model
@@ -220,6 +235,14 @@ print('Precision: {}'.format(precision_test))
 print('Recall: {}'.format(recall_test))
 print('F-1 Score: {}'.format(F1_test))
 
+
+cm = confusion_matrix(y_test, y_test_pred)
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted labels')
+plt.ylabel('True labels')
+plt.title('Confusion Matrix - Logistic Regression')
+plt.show()
 
 
 # set the user interface 
